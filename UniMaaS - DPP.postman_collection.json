@@ -1,0 +1,415 @@
+{
+	"info": {
+		"_postman_id": "baebb8af-f53f-40d2-a0d2-f1355892f534",
+		"name": "UniMaaS - DPP",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "37438831"
+	},
+	"item": [
+		{
+			"name": "Orion-LD",
+			"item": [
+				{
+					"name": "1 - Subscription management",
+					"item": [
+						{
+							"name": "GetSubscriptions",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:1026/ngsi-ld/v1/subscriptions",
+									"host": [
+										"localhost"
+									],
+									"port": "1026",
+									"path": [
+										"ngsi-ld",
+										"v1",
+										"subscriptions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "CreateSubscription (Create asset in blockchain)",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/ld+json"
+									},
+									{
+										"key": "fiware-service",
+										"value": "unimaas",
+										"type": "text",
+										"disabled": true
+									},
+									{
+										"key": "fiware-servicepath",
+										"value": "/",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"id\": \"urn:ngsi-ld:Subscription:Asset-Blockchain\",\r\n    \"type\": \"Subscription\",\r\n    \"description\": \"Notification to register asset on Blockchain when opType==1\",\r\n    \"entities\": [\r\n        {\r\n            \"type\": \"Asset\"\r\n        }\r\n    ],\r\n    \"q\": \"opType==1\",\r\n    \"status\": \"active\",\r\n    \"isActive\": true,\r\n    \"notification\": {\r\n        \"format\": \"normalized\",\r\n        \"endpoint\": {\r\n            \"uri\": \"http://api:3002/unimaas/create\",\r\n            \"accept\": \"application/json\"\r\n        },\r\n        \"status\": \"ok\"\r\n    },\r\n    \"expiresAt\": \"2040-01-01T14:00:00.000Z\",\r\n    \"throttling\": 5,\r\n    \"@context\": \"https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context-v1.8.jsonld\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:1026/ngsi-ld/v1/subscriptions/",
+									"host": [
+										"localhost"
+									],
+									"port": "1026",
+									"path": [
+										"ngsi-ld",
+										"v1",
+										"subscriptions",
+										""
+									]
+								},
+								"description": "Generated from cURL: curl -s -i -X POST 'http://localhost:1026/ngsi-ld/v1/subscriptions/' -H 'Content-Type: application/ld+json' -d '{\r\n  \"id\":\"urn:ngsi-ld:Subscription:Asset-Blockchain\",\r\n  \"type\":\"Subscription\",\r\n  \"description\":\"Notification to register asset on Blockchain when opType==1\",\r\n  \"entities\":[{\"type\":\"Asset\"}],\r\n  \"q\":\"opType==1\",\r\n  \"status\":\"active\",\r\n  \"isActive\":true,\r\n  \"notification\":{\r\n    \"format\":\"normalized\",\r\n    \"endpoint\":{\"uri\":\"http://10.0.2.15:3000/invoke\",\"accept\":\"application/json\"},\r\n    \"status\":\"ok\"\r\n  },\r\n  \"expiresAt\":\"2040-01-01T14:00:00.000Z\",\r\n  \"throttling\":5,\r\n  \"@context\":\"https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context-v1.8.jsonld\"\r\n}'"
+							},
+							"response": []
+						},
+						{
+							"name": "CreateSubscription (Update asset in blockchain)",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/ld+json"
+									},
+									{
+										"key": "fiware-service",
+										"value": "unimaas",
+										"type": "text",
+										"disabled": true
+									},
+									{
+										"key": "fiware-servicepath",
+										"value": "/",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"id\": \"urn:ngsi-ld:Subscription:Asset-Update\",\r\n    \"type\": \"Subscription\",\r\n    \"description\": \"Notification to update asset on Blockchain when opType==2\",\r\n    \"entities\": [\r\n        {\r\n            \"type\": \"Asset\"\r\n        }\r\n    ],\r\n    \"watchedAttributes\": [\r\n        \"appraisedValue\",\r\n        \"color\",\r\n        \"manufacturer\",\r\n        \"material\",\r\n        \"model\",\r\n        \"production_date\",\r\n        \"recyclability\",\r\n        \"serial_number\",\r\n        \"size\",\r\n        \"weight\"\r\n    ],\r\n    \"q\": \"opType==2\",\r\n    \"status\": \"active\",\r\n    \"isActive\": true,\r\n    \"notification\": {\r\n        \"format\": \"normalized\",\r\n        \"endpoint\": {\r\n            \"uri\": \"http://api:3002/unimaas/update\",\r\n            \"accept\": \"application/json\"\r\n        },\r\n        \"status\": \"ok\"\r\n    },\r\n    \"expiresAt\": \"2040-01-01T14:00:00.000Z\",\r\n    \"throttling\": 5,\r\n    \"@context\": \"https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context-v1.8.jsonld\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:1026/ngsi-ld/v1/subscriptions/",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "1026",
+									"path": [
+										"ngsi-ld",
+										"v1",
+										"subscriptions",
+										""
+									]
+								},
+								"description": "Generated from cURL: curl -s -i -X POST 'http://localhost:1026/ngsi-ld/v1/subscriptions/' -H 'Content-Type: application/ld+json' -d '{\r\n  \"id\":\"urn:ngsi-ld:Subscription:Asset-Update\",\r\n  \"type\":\"Subscription\",\r\n  \"description\":\"Notification to update asset on Blockchain when opType==2\",\r\n  \"entities\":[{\"type\":\"Asset\"}],\r\n  \"watchedAttributes\":[\"appraisedValue\",\"color\",\"manufacturer\",\"material\",\"model\",\"production_date\",\"recyclability\",\"serial_number\",\"size\",\"weight\"],\r\n  \"q\":\"opType==2\",\r\n  \"status\":\"active\",\r\n  \"isActive\":true,\r\n  \"notification\":{\r\n    \"format\":\"normalized\",\r\n    \"endpoint\":{\"uri\":\"http://10.0.2.15:3000/update\",\"accept\":\"application/json\"},\r\n    \"status\":\"ok\"\r\n  },\r\n  \"expiresAt\":\"2040-01-01T14:00:00.000Z\",\r\n  \"throttling\":5,\r\n  \"@context\":\"https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context-v1.8.jsonld\"\r\n}'"
+							},
+							"response": []
+						},
+						{
+							"name": "DeleteSubscription (Create asset in blockchain)",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "fiware-service",
+										"value": "unimaas",
+										"type": "text",
+										"disabled": true
+									},
+									{
+										"key": "fiware-servicepath",
+										"value": "/",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"url": {
+									"raw": "http://localhost:1026/ngsi-ld/v1/subscriptions/urn:ngsi-ld:Subscription:Asset-Blockchain",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "1026",
+									"path": [
+										"ngsi-ld",
+										"v1",
+										"subscriptions",
+										"urn:ngsi-ld:Subscription:Asset-Blockchain"
+									]
+								},
+								"description": "Generated from cURL: curl -s -i -X DELETE 'http://localhost:1026/ngsi-ld/v1/subscriptions/urn:ngsi-ld:Subscription:Asset-Blockchain' -H 'Accept: application/json'"
+							},
+							"response": []
+						},
+						{
+							"name": "DeleteSubscription (Update asset in blockchain)",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									},
+									{
+										"key": "fiware-service",
+										"value": "unimaas",
+										"type": "text",
+										"disabled": true
+									},
+									{
+										"key": "fiware-servicepath",
+										"value": "/",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"url": {
+									"raw": "http://localhost:1026/ngsi-ld/v1/subscriptions/urn:ngsi-ld:Subscription:Asset-Update",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "1026",
+									"path": [
+										"ngsi-ld",
+										"v1",
+										"subscriptions",
+										"urn:ngsi-ld:Subscription:Asset-Update"
+									]
+								},
+								"description": "Generated from cURL: curl -s -i -X DELETE 'http://localhost:1026/ngsi-ld/v1/subscriptions/urn:ngsi-ld:Subscription:Asset-Update' -H 'Accept: application/json'"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "2 - Entity management",
+					"item": [
+						{
+							"name": "CreateEntity (Asset)",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "fiware-service",
+										"value": "unimaas",
+										"type": "text",
+										"disabled": true
+									},
+									{
+										"key": "fiware-servicepath",
+										"value": "/",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n        \"id\": \"urn:ngsi-ld:Asset:p-update\",\r\n        \"type\": \"Asset\",\r\n        \"appraisedValue\": {\r\n            \"type\": \"Property\",\r\n            \"value\": \"1\"\r\n        },\r\n        \"color\": {\r\n            \"type\": \"Property\",\r\n            \"value\": \"p\"\r\n        },\r\n        \"manufacturer\": {\r\n            \"type\": \"Property\",\r\n            \"value\": \"p\"\r\n        },\r\n        \"material\": {\r\n            \"type\": \"Property\",\r\n            \"value\": \"p\"\r\n        },\r\n        \"model\": {\r\n            \"type\": \"Property\",\r\n            \"value\": \"p\"\r\n        },\r\n        \"opType\": {\r\n            \"type\": \"Property\",\r\n            \"value\": 1\r\n        },\r\n        \"productionDate\": {\r\n            \"type\": \"Property\",\r\n            \"value\": \"p\"\r\n        },\r\n        \"recyclability\": {\r\n            \"type\": \"Property\",\r\n            \"value\": \"p\"\r\n        },\r\n        \"serialNumber\": {\r\n            \"type\": \"Property\",\r\n            \"value\": \"p\"\r\n        },\r\n        \"size\": {\r\n            \"type\": \"Property\",\r\n            \"value\": \"p\"\r\n        },\r\n        \"weight\": {\r\n            \"type\": \"Property\",\r\n            \"value\": \"p\"\r\n        }\r\n    }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:1026/ngsi-ld/v1/entities",
+									"host": [
+										"localhost"
+									],
+									"port": "1026",
+									"path": [
+										"ngsi-ld",
+										"v1",
+										"entities"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "UpdateEntity (Asset)",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "fiware-service",
+										"value": "unimaas",
+										"type": "text",
+										"disabled": true
+									},
+									{
+										"key": "fiware-servicepath",
+										"value": "/",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"id\": \"urn:ngsi-ld:Asset:q\",\r\n    \"type\": \"Asset\",\r\n    \"color\": {\r\n        \"type\": \"Property\",\r\n        \"value\": \"1\"\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:1026/ngsi-ld/v1/entities/{{entityId}}/attrs",
+									"host": [
+										"localhost"
+									],
+									"port": "1026",
+									"path": [
+										"ngsi-ld",
+										"v1",
+										"entities",
+										"{{entityId}}",
+										"attrs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "GetEntity (Asset)",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "fiware-service",
+										"value": "unimaas",
+										"type": "text",
+										"disabled": true
+									},
+									{
+										"key": "fiware-servicepath",
+										"value": "/",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"url": {
+									"raw": "localhost:1026/ngsi-ld/v1/entities/{{entityId}}",
+									"host": [
+										"localhost"
+									],
+									"port": "1026",
+									"path": [
+										"ngsi-ld",
+										"v1",
+										"entities",
+										"{{entityId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "GetAllAssetEntities",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "fiware-service",
+										"value": "unimaas",
+										"type": "text",
+										"disabled": true
+									},
+									{
+										"key": "fiware-servicepath",
+										"value": "/",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"url": {
+									"raw": "localhost:1026/ngsi-ld/v1/entities?type=Asset",
+									"host": [
+										"localhost"
+									],
+									"port": "1026",
+									"path": [
+										"ngsi-ld",
+										"v1",
+										"entities"
+									],
+									"query": [
+										{
+											"key": "type",
+											"value": "Asset"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "DeleteEntity (Asset)",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "fiware-service",
+										"value": "unimaas",
+										"type": "text",
+										"disabled": true
+									},
+									{
+										"key": "fiware-servicepath",
+										"value": "/",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"url": {
+									"raw": "localhost:1026/ngsi-ld/v1/entities/{{entityId}}",
+									"host": [
+										"localhost"
+									],
+									"port": "1026",
+									"path": [
+										"ngsi-ld",
+										"v1",
+										"entities",
+										"{{entityId}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		}
+	]
+}

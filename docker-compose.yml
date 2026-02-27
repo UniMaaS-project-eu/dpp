@@ -1,0 +1,117 @@
+services:
+  mongo:
+    image: mongo:${MONGO_VERSION}
+    hostname: ${MONGO_HOSTNAME}
+    container_name: mongo-db
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: always
+    working_dir: /mongo
+    ports:
+      - "${MONGO_EXTERNAL_PORT}:${MONGO_INTERNAL_PORT}"
+    command: --nojournal
+    networks:
+      dpp_network:
+        ipv4_address: ${NETWORK_PREFIX}.2
+    volumes:
+      - mongo-vdb:/data
+
+  orion:
+    image: fiware/orion-ld:${ORION_VERSION}
+    hostname: ${ORION_HOSTNAME}
+    container_name: orion-ld
+    depends_on:
+      - mongo
+    expose:
+      - "${ORION_EXTERNAL_PORT}"
+    ports:
+      - "${ORION_EXTERNAL_PORT}:${ORION_INTERNAL_PORT}" 
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    command: -dbhost ${MONGO_HOSTNAME} -logLevel DEBUG
+    networks:
+      dpp_network:
+        ipv4_address: ${NETWORK_PREFIX}.3
+    healthcheck:
+      test: curl --fail -s http://${ORION_HOSTNAME}:${ORION_INTERNAL_PORT}/version || exit 1
+    restart: always
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    restart: always
+    hostname: ${WEB_HOSTNAME}
+    container_name: web
+    depends_on:
+      - orion
+      - keycloak
+    ports:
+    - "${WEB_EXTERNAL_PORT}:${WEB_INTERNAL_PORT}"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      dpp_network:
+        ipv4_address: ${NETWORK_PREFIX}.4
+    environment:
+      - WEB_INTERNAL_PORT=${WEB_INTERNAL_PORT}
+      - WEB_SECRET_KEY=${WEB_SECRET_KEY}
+      - WEB_DEBUG=${WEB_DEBUG} # Values: 0 - False, 1 - True
+      - ORION_URL=${ORION_PROTOCOL}${ORION_HOSTNAME}:${ORION_EXTERNAL_PORT}
+      - KEYCLOAK_REALM=${KEYCLOAK_REALM}
+      - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID}
+      - KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}
+      - KEYCLOAK_PUBLIC_URL=${KEYCLOAK_PROTOCOL}${KEYCLOAK_PUBLIC_HOSTNAME}:${KEYCLOAK_EXTERNAL_PORT}
+      - KEYCLOAK_INTERNAL_URL=${KEYCLOAK_PROTOCOL}${KEYCLOAK_HOSTNAME}:${KEYCLOAK_INTERNAL_PORT}
+      - API_REST_URL=${API_PROTOCOL}${API_HOSTNAME}:${API_EXTERNAL_PORT}
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:${KEYCLOAK_VERSION}
+    hostname: ${KEYCLOAK_HOSTNAME}
+    container_name: keycloak
+    ports:
+      - "${KEYCLOAK_EXTERNAL_PORT}:${KEYCLOAK_INTERNAL_PORT}"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      dpp_network:
+        ipv4_address: ${NETWORK_PREFIX}.5
+    restart: always
+    command: ['start-dev']
+    volumes:
+      - keycloak-volume:/opt/keycloak/data
+      - ./certs/:/opt/keycloak/certs
+    environment:
+      - KC_BOOTSTRAP_ADMIN_USERNAME=${KEYCLOAK_ADMIN}
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+      - KC_REALM=${KEYCLOAK_REALM}
+      - KC_HTTPS_CERTIFICATE_FILE=/opt/keycloak/certs/${KEYCLOAK_CERT}
+      - KC_HTTPS_CERTIFICATE_KEY_FILE=/opt/keycloak/certs/${KEYCLOAK_KEY}
+      - KC_HOSTNAME=localhost # Remove in the future (this allows a token with localhost issuer)
+      - KC_HOSTNAME_STRICT=false # Remove in the future (this allows a token with localhost issuer)
+
+networks:
+  dpp_network:
+    ipam:
+      config:
+        - subnet: ${NETWORK_PREFIX}.0/24
+  fabric_test:
+      external: true
+
+volumes:
+  mongo-vdb:
+    driver: local
+  keycloak-volume:
+    driver: local

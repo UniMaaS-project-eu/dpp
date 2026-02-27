@@ -1,0 +1,372 @@
+  body {
+    background: #fafafa;
+    color: #000000;
+    margin-top: 5rem;
+    font-family: 'Figtree', sans-serif;
+    font-weight: 400;
+    font-optical-sizing: auto;
+    font-size: 1.050rem;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    color: #000000;
+  }
+  
+  .bg-steel {
+    background-color: #4f5c53;
+  }
+  
+  .site-header .navbar-nav .nav-link {
+    color: #ffffff;
+  }
+  
+  .site-header .navbar-nav .nav-link:hover {
+    color: #cccccc;
+  }
+
+  .navbar-brand {
+    color: #ffffff !important; /* Fuerza el color a blanco */
+  }
+
+  .navbar-brand-spacing {
+    margin-right: 30px; /* Ajusta el valor según sea necesario */
+    margin-left: 5px;
+  }
+  
+  .site-header .navbar-nav .nav-link.active {
+    font-weight: 500;
+  }
+  
+  .content-section {
+    flex-basis: 60%; /* El cuadro de login ocupará el 70% del espacio disponible */
+    padding: 1rem;
+    background: #ffffff;
+    border-radius: 2px;
+    margin-bottom: 7px;
+  }
+  
+
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
+
+  .wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    justify-content: space-between; /* Distribuye el contenido */
+  }
+  
+  .content {
+    flex-grow: 1;
+    margin-top: 77px; /* Adjust this value based on the height of your navbar + additional space */
+  }
+
+  footer {
+    background-color: #f8f9fa;
+    color: #333;
+    padding: 15px 0; /* Espaciado dentro del footer */
+    text-align: center;
+    margin-top: auto; /* Esto hace que el footer se mantenga en la parte inferior cuando el contenido es corto */
+    width: 100%; /* Para evitar desbordes */
+    position: relative;
+    border-top: 1px solid #dee2e6;
+  }
+
+  .custom-hr {
+    border: 0;
+    height: 2px;
+    background-color: #4f5c53; /* Color verde grisáceo UniMaaS actualizado */
+    margin-top: 1.5rem; /* Ajuste del margen superior */
+    margin-bottom: 1.5rem; /* Ajuste del margen inferior */
+  }
+
+  .star-icon {
+    color: yellow;
+    text-shadow: 
+      0 0 1px black, 
+      0 0 2px black, 
+      0 0 3px black, 
+      0 0 4px black;
+    margin-right: 0.5rem;
+  }
+
+  .image-section {
+    flex-basis: 40%; /* La imagen ocupará el 30% del espacio disponible */
+    position: relative;
+  }
+  
+  .image-section img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.85;
+    border-radius: 5px;
+  }
+  
+  .image-section .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.5); /* Fondo oscuro semitransparente */
+    border-radius: 5px;
+    color: #fff;
+  }
+  
+  .image-section .overlay-text {
+    font-size: 1.8rem;
+    text-align: center;
+    padding: 0 1rem;
+  }
+
+  .default-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    height: 95%; /* Asegura que tanto el formulario como la imagen se alineen en altura */
+    border: 1px solid #0acf00 !important; /* Añade un borde alrededor del contenedor */
+    border-radius: 15px; /* Bordes redondeados para el contenedor */
+    overflow: hidden; /* Asegura que los bordes redondeados se apliquen bien */
+    background-color: #fff; /* Fondo blanco para que se vea uniforme */
+  }
+
+  .form-group .form-control-label {
+    font-size: 0.95rem; /* Tamaño de fuente más pequeño */
+    font-weight: 400; /* Ajusta el peso de la fuente si es necesario */
+    
+  }
+  
+  .form-group .form-control {
+    font-size: 0.925rem; /* Tamaño de fuente para el texto dentro del campo */
+    padding: 0.5rem; /* Ajusta el padding si es necesario */
+  }
+
+  .product-section {
+    flex-basis: 100%; /* El cuadro de login ocupará el 70% del espacio disponible */
+    padding: 2rem;
+    background: #ffffff;
+    border-radius: 2px;
+    margin-bottom: 7px;
+  }
+
+  .account-container {
+    display: flex;
+    justify-content: center; /* Centra el contenedor horizontalmente */
+    align-items: flex-start; /* Alinea el contenido en la parte superior, ajustándose a la altura */
+    background-color: #fbfbfb; /* Fondo blanco */
+    padding: 20px; /* Añade espacio interno */
+    box-sizing: border-box; /* Incluye padding y borde en el cálculo del tamaño */
+  }
+
+  .account-section {
+    width: 600px; /* Define el ancho del cuadro de registro */
+    padding: 20px; /* Añade un poco de espacio interior */
+    background-color: #f8f9fa; /* Color de fondo ligeramente gris para diferenciar del fondo */
+    border-radius: 10px; /* Bordes redondeados para el contenido */
+    border: 1px solid #0acf00 !important; /* Borde alrededor del contenedor */
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1); /* Sombra ligera para dar profundidad */
+  }
+
+  .account-img {
+    height: 125px;
+    width: 125px;
+    margin-right: 20px;
+    margin-bottom: 16px;
+  }
+
+  .search-container {
+    border: 1px solid #28a745; 
+    padding: 10px; 
+    border-radius: 10px;
+  }
+  
+  .search-form {
+    margin-left: 150px;  /* Margen lateral en PC */
+    margin-right: 150px; /* Margen lateral en PC */
+  }
+
+  .search-content {
+    text-align: left; 
+    font-size: 1.1rem;
+    background-color: #e6e6e6; 
+    margin-bottom: 17px; 
+    padding: 9px; 
+    border-radius: 10px;
+  }
+
+  .separator {
+    margin-left: 13px;
+    margin-right: 13px;
+  }
+
+  .info_product_image {
+    height: 25px; 
+    width: 25px; 
+    margin-right: 5px;
+  }
+
+  .password-wrapper {
+    position: relative;
+  }
+
+  .form-control {
+      width: 100%;
+      padding-right: 40px; /* Espacio para el ícono del ojo */
+  }
+
+  .eye-icon {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      font-size: 18px;
+      color: #6c757d;
+  }
+
+  .eye-icon:hover {
+      color: #495057;
+  }
+
+  .reset-container {
+    display: flex;
+    justify-content: space-between;
+    margin-right: 200px;
+    margin-left: 200px;
+    border: 1px solid #0acf00 !important; /* Añade un borde alrededor del contenedor */
+    border-radius: 15px; /* Bordes redondeados para el contenedor */
+    overflow: hidden; /* Asegura que los bordes redondeados se apliquen bien */
+    background-color: #fff; /* Fondo blanco para que se vea uniforme */
+  }
+
+
+  .reset-section {
+    flex-basis: 100%;
+    padding: 1rem;
+    background: #ffffff;
+    border-radius: 2px;
+    margin-bottom: 7px;
+  }
+  
+  /* 📌 RESPONSIVE - SOLO PARA MÓVILES */
+@media (max-width: 768px) {
+  .content {
+    padding-bottom: 6rem; /* Mayor separación en móviles */
+    justify-content: center !important;
+    align-items: center !important;
+  }
+  
+  /* ✅ Contenedor principal */
+  .default-container {
+      flex-direction: column; /* Cambia a disposición en columna */
+      align-items: center; /* Centra los elementos */
+      gap: 1rem; /* Espaciado entre las secciones */
+      padding: 1rem; /* Espaciado interno */
+      margin-top: 1rem; /* Espaciado superior */
+  }
+
+  /* ✅ Ajustes del formulario */
+  .content-section {
+      width: 90%; /* Formulario ocupa el 90% del ancho */
+      margin-bottom: 1rem; /* Separación inferior */
+  }
+
+  .form-group {
+      margin-bottom: 1rem; /* Espaciado entre campos del formulario */
+  }
+
+  .btn {
+      width: 100%; /* Botón ocupa todo el ancho */
+  }
+
+  /* ✅ Imagen de login */
+  .image-section {
+      width: 100% !important; /* Asegura que el contenedor ocupa todo el ancho */
+      text-align: center; /* Centra el contenido */
+  }
+
+  .image-section img {
+      max-height: 300px !important; /* Reduce más la altura de la imagen */
+      width: 100% !important;
+      object-fit: cover !important;
+  }
+
+  .overlay-text {
+      font-size: 1rem !important; /* Reducir aún más y forzar */
+      line-height: 1 !important; /* Menos espacio entre líneas */
+      word-break: break-word !important; /* Evita que las palabras largas se salgan */
+      text-align: center !important;
+      padding: 0.2rem !important; /* Reduce el espacio interno */
+      max-width: 80% !important;
+      margin: 0 auto !important;
+  }
+  
+  .content {
+    padding-bottom: 6rem;
+    flex-direction: column;
+    align-items: center !important;
+  }
+
+  .search-form {
+    display: block !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    max-width: 320px;
+    margin: 0 auto;
+  }
+
+  /* ✅ Icono de búsqueda */
+  .search-icon {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 10px;
+  }
+
+  /* ✅ Ajustes para los campos de búsqueda */
+  .search-select,
+  .search-input,
+  .search-button {
+    width: 100% !important; /* Ocupar más ancho */
+    max-width: 320px; /* No hacerlos demasiado anchos */
+    margin: 5px 0;
+    text-align: left !important;
+    font-size: 1rem;
+  }
+
+  .search-input {
+    height: 45px; /* Asegurar altura */
+  }
+
+  .search-button {
+    height: 50px !important;
+    font-size: 1rem;
+    width: 100% !important;
+    max-width: 320px;
+    text-align: center !important;
+  }
+
+  /* ✅ Ajuste de la sección de búsqueda */
+  .search-container {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+  }
+
+
+  .no-results {
+      font-size: 1rem;
+      color: red;
+      text-align: center;
+      margin-top: 15px;
+  }
+
+  footer {
+    padding-bottom: 8rem !important;
+  }
+}

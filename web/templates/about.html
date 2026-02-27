@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <div class="about-section text-center mt-4">
+        <h1 class="text-left">About UniMaaS</h1>
+        <hr class="my-3 custom-hr">
+        <div class="mt-4 mb-4 text-center">
+            <img src="{{ url_for('static', filename='img/UniMaaS-logo-big.png') }}" alt="UniMaaS Logo" style="height: 80px; margin-bottom: 20px;">
+            <h4 style="color: #666;">Unified Modeling and Automated Scheduling for Manufacturing as a Service</h4>
+        </div>
+        <div class="text-left mt-4">
+            <p class="mt-3">
+                <strong>UniMaaS vision</strong> is to deliver a platform for <strong>flexible, agile and decentralized manufacturing</strong>, embracing the Manufacturing as a Service (MaaS) paradigm.<br><br>
+                
+                This <strong>Digital Product Passport (DPP) system</strong> enables comprehensive tracking and management of products throughout their lifecycle, providing transparency and traceability in manufacturing processes.<br><br>
+                                
+                <strong>Key features:</strong>
+                <ul class="mt-2">
+                    <li>Product registration and lifecycle tracking</li>
+                    <li>Comprehensive product information management</li>
+                    <li>Manufacturing process transparency</li>
+                    <li>Integration with blockchain technology</li>
+                    <li>Support for Industry 4.0 standards</li>
+                </ul>
+            </p>
+            
+            <div class="mt-4 p-3" style="background-color: #f8f9fa; border-left: 4px solid #8b978d;">
+                <p class="mb-1"><strong>Funded by the European Union</strong></p>
+                <p class="mb-0" style="font-size: 0.9em; color: #666;">
+                    Grant Agreement No: 101177842<br>
+                    Views and opinions expressed are those of the authors only and do not necessarily reflect those of the European Union or the European Commission.
+                </p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

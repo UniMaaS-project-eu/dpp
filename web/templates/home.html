@@ -1,0 +1,9 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="image-section d-block position-relative">
+  <img src="{{ url_for('static', filename='img/home.jpg') }}" alt="Main image" class="img-fluid">
+  <div class="overlay">
+    <h3 class="overlay-text" style="font-style: italic; color:white">Welcome to UniMaaS Digital Product Passport!</h3>
+  </div>
+</div>
+{% endblock content %}
