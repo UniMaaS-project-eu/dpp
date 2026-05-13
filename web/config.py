@@ -4,6 +4,8 @@ import os
 listenPort = int(os.environ.get('WEB_INTERNAL_PORT', '8080'))
 secretKey = os.environ.get('WEB_SECRET_KEY', '')
 debug = int(os.environ.get('WEB_DEBUG', '0')) == 1
+webProtocol = os.environ.get('WEB_PROTOCOL', 'http://').strip().lower()
+useSSL = webProtocol.startswith('https')
 
 # Keycloak variables
 keycloakRealm = os.environ.get('KEYCLOAK_REALM', '')

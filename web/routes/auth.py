@@ -69,12 +69,25 @@ def processOIDCCallback(code, action):
     try:
         # TODO: Verify should not be false in the future
         response = httpSession.post(tokenEndpoint, data=payload, verify=False)
+        if response.status_code != 200:
+            logger.info(f"Token endpoint error ({response.status_code}): {response.text}")
+            return "Authentication error."
+
         # TODO: in the future, the issuer should be from the public URL
-        tokenData = response.json()
+        try:
+            tokenData = response.json()
+        except ValueError:
+            logger.info(f"Invalid JSON from token endpoint ({response.status_code}): {response.text}")
+            return "Authentication error."
 
         if 'access_token' in tokenData:
             userInfoEndpoint = f"{config.keycloakInternalURL}/realms/{config.keycloakRealm}/protocol/openid-connect/userinfo"
             userInfoResponse = httpSession.get(userInfoEndpoint, headers={'Authorization': f"Bearer {tokenData['access_token']}"}, verify=False)
+
+            if userInfoResponse.status_code != 200:
+                logger.info(f"Userinfo endpoint error ({userInfoResponse.status_code}): {userInfoResponse.text}")
+                return "Authentication error."
+
             userInfo = userInfoResponse.json()
             decodedToken = jwt.decode(tokenData['access_token'], options={"verify_signature": False})
 
@@ -97,7 +110,7 @@ def processOIDCCallback(code, action):
                 return redirect(url_for('general.home'))
 
         else:
-            logger.info("Error: No access_token received.")
+            logger.info(f"Error: No access_token received. Response: {tokenData}")
             return "Authentication error."
 
     except Exception as e:
@@ -110,10 +123,10 @@ def logout():
     try:
         keycloakLogoutEndpoint = f"{config.keycloakPublicURL}/realms/{config.keycloakRealm}/protocol/openid-connect/logout"
         idToken = session.get("userinfo", {}).get("id_token", "")
+        postLogoutRedirectURI = f"{request.url_root.rstrip('/')}{url_for('general.home')}"
 
-        '''url_for("general.home", _external=True)'''  # TODO: disabled for localhost, otherwise it causes a bad redirect. In the future, use the correct url_for
         params = {
-            "post_logout_redirect_uri": "https://localhost:8080/home"
+            "post_logout_redirect_uri": postLogoutRedirectURI
         }
 
         # If the user has an ID token, include it in the logout request
@@ -122,12 +135,6 @@ def logout():
 
         session.clear()  # Clear Flask session data
         return redirect(buildURL(keycloakLogoutEndpoint, params))
-
-        flash("You have successfully logged out!", "success")
-        if config.debug:
-            logger.info("Successful logout")
-
-        return redirect(url_for('home'))
 
     except Exception as e:
         logger.error(f"Exception during logout: {e}")

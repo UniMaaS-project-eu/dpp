@@ -1,0 +1,141 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="default-container d-flex">
+    <div class="product-section flex-grow-1 p-4">
+        <form method="POST" novalidate autocomplete="off">
+            {{ form.hidden_tag() }}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">
+                    <i class="fas fa-edit" style="margin-right: 7px;"></i>
+                    <span>Edit {{ product.modelName }} · #{{ product.partNumber }}</span>
+                </legend>
+
+                <!-- Fixed fields (read-only) -->
+                <h5 class="mt-3 mb-3 section-title"><i class="fas fa-lock"></i> Product Model Properties (Read-only)</h5>
+                <p class="text-muted small mb-3">These fields are defined by the product model and cannot be modified.</p>
+                <div class="fixed-fields-container mb-4">
+                    {% for fieldKey, fieldLabel in fixedFieldLabels.items() %}
+                    {% if product[fieldKey] is not none and product[fieldKey] != "" %}
+                    <div class="row mb-2">
+                        <div class="col-md-4"><strong class="fixed-field-label">{{ fieldLabel }}</strong></div>
+                        <div class="col-md-8">
+                            <span class="fixed-field-value">
+                                {{ product[fieldKey] }}{% if fieldKey == "manufacturingCarbonFootprint" %} kgCO₂{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+
+                <hr class="custom-hr">
+
+                <!-- Editable lifecycle fields -->
+                <h5 class="mt-4 mb-3 section-title"><i class="fas fa-recycle"></i> Lifecycle Fields</h5>
+                <p class="text-muted small mb-3">Update the lifecycle details of this product.</p>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {{ form.status.label(class="form-control-label") }}
+                            {% if form.status.errors %}
+                                {{ form.status(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.status.errors %}<span>{{ error }}</span>{% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.status(class="form-control form-control-lg") }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {{ form.condition.label(class="form-control-label") }}
+                            {% if form.condition.errors %}
+                                {{ form.condition(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.condition.errors %}<span>{{ error }}</span>{% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.condition(class="form-control form-control-lg") }}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    {% if showNumberOfUses %}
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {{ form.numberOfUses.label(class="form-control-label") }}
+                            {% if form.numberOfUses.errors %}
+                                {{ form.numberOfUses(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.numberOfUses.errors %}<span>{{ error }}</span>{% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.numberOfUses(class="form-control form-control-lg") }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    <div class="{% if showNumberOfUses %}col-md-6{% else %}col-md-12{% endif %}">
+                        <div class="form-group">
+                            {{ form.currentLocation.label(class="form-control-label") }}
+                            {% if form.currentLocation.errors %}
+                                {{ form.currentLocation(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.currentLocation.errors %}<span>{{ error }}</span>{% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.currentLocation(class="form-control form-control-lg") }}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    {% if showLastMaintenanceDate %}
+                    <div class="{% if showLifecycleCarbonFootprint %}col-md-6{% else %}col-md-12{% endif %}">
+                        <div class="form-group">
+                            {{ form.lastMaintenanceDate.label(class="form-control-label") }}
+                            {% if form.lastMaintenanceDate.errors %}
+                                {{ form.lastMaintenanceDate(class="form-control form-control-lg is-invalid", type="date") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.lastMaintenanceDate.errors %}<span>{{ error }}</span>{% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.lastMaintenanceDate(class="form-control form-control-lg", type="date") }}
+                            {% endif %}
+                            <small class="form-text text-muted">Leave empty if not applicable</small>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if showLifecycleCarbonFootprint %}
+                    <div class="{% if showLastMaintenanceDate %}col-md-6{% else %}col-md-12{% endif %}">
+                        <div class="form-group">
+                            {{ form.lifecycleCarbonFootprint.label(class="form-control-label") }}
+                            {% if form.lifecycleCarbonFootprint.errors %}
+                                {{ form.lifecycleCarbonFootprint(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.lifecycleCarbonFootprint.errors %}<span>{{ error }}</span>{% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.lifecycleCarbonFootprint(class="form-control form-control-lg") }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+            </fieldset>
+            <div class="form-group d-flex justify-content-between">
+                <a href="{{ url_for('product.productDetail', partNumber=product.partNumber) }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Cancel
+                </a>
+                {{ form.submit(class="btn btn-unimaas") }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock content %}

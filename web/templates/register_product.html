@@ -7,176 +7,254 @@
             {{ form.hidden_tag() }}
             <fieldset class="form-group">
                 <legend class="border-bottom mb-4">
-                    <!-- Small image -->
                     <img src="{{ url_for('static', filename='img/register_product_symbol.jpg') }}" alt="Register product" style="width: 50px; height: auto; margin-right: 7px;">
-                    <!-- Text next to the image -->
-                    <span>Register your product in the system</span>
+                    <span>Register {{ productModel.modelName }}</span>
                 </legend>
+
+                <!-- Fixed fields (read-only, from Product Model) -->
+                <h5 class="mt-3 mb-3 section-title"><i class="fas fa-lock"></i> Product Model Properties</h5>
+                <p class="text-muted small mb-3">These fields are defined by the product model and cannot be modified.</p>
+                
+                <div class="fixed-fields-container mb-4">
+                    {% for fieldKey, fieldLabel in fixedFieldLabels.items() %}
+                        {% if fieldKey in productModel %}
+                        <div class="row mb-2">
+                            <div class="col-md-4">
+                                <strong class="fixed-field-label">{{ fieldLabel }}</strong>
+                            </div>
+                            <div class="col-md-8">
+                                <span class="fixed-field-value">{{ productModel[fieldKey] }}</span>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                <hr class="custom-hr">
+
+                <!-- Dynamic fields (user input) -->
+                <h5 class="mt-4 mb-3 section-title"><i class="fas fa-edit"></i> Product Instance Details</h5>
+                <p class="text-muted small mb-3">Fill in the specific details for this product unit.</p>
+
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            {{ form.productID.label(class="form-control-label") }}
-                            {% if form.productID.errors %}
-                                {{ form.productID(class="form-control form-control-lg is-invalid") }}
+                            {{ form.partNumber.label(class="form-control-label") }}
+                            {% if form.partNumber.errors %}
+                                {{ form.partNumber(class="form-control form-control-lg is-invalid", placeholder="e.g. WH-MAN-01") }}
                                 <div class="invalid-feedback">
-                                    {% for error in form.productID.errors %}
+                                    {% for error in form.partNumber.errors %}
                                         <span>{{ error }}</span>
                                     {% endfor %}
                                 </div>
                             {% else %}
-                                {{ form.productID(class="form-control form-control-lg") }}
+                                {{ form.partNumber(class="form-control form-control-lg", placeholder="e.g. WH-MAN-01") }}
                             {% endif %}
+                            <small class="form-text text-muted">Unique identifier (letters, numbers, hyphen or underscore)</small>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            {{ form.manufacturer.label(class="form-control-label") }}
-                            {% if form.manufacturer.errors %}
-                                {{ form.manufacturer(class="form-control form-control-lg is-invalid") }}
+                            {{ form.manufacturingDate.label(class="form-control-label") }}
+                            {% if form.manufacturingDate.errors %}
+                                {{ form.manufacturingDate(class="form-control form-control-lg is-invalid", type="date") }}
                                 <div class="invalid-feedback">
-                                    {% for error in form.manufacturer.errors %}
+                                    {% for error in form.manufacturingDate.errors %}
                                         <span>{{ error }}</span>
                                     {% endfor %}
                                 </div>
                             {% else %}
-                                {{ form.manufacturer(class="form-control form-control-lg") }}
+                                {{ form.manufacturingDate(class="form-control form-control-lg", type="date") }}
                             {% endif %}
+                            <small class="form-text text-muted">ISO 8601 format (YYYY-MM-DD)</small>
                         </div>
                     </div>
                 </div>
+
                 <div class="row">
+                    {% if hasReturnRatio %}
                     <div class="col-md-6">
                         <div class="form-group">
-                            {{ form.model.label(class="form-control-label") }}
-                            {% if form.model.errors %}
-                                {{ form.model(class="form-control form-control-lg is-invalid") }}
+                            {{ form.returnRatio.label(class="form-control-label") }}
+                            {% if form.returnRatio.errors %}
+                                {{ form.returnRatio(class="form-control form-control-lg is-invalid", placeholder="e.g. 3") }}
                                 <div class="invalid-feedback">
-                                    {% for error in form.model.errors %}
+                                    {% for error in form.returnRatio.errors %}
                                         <span>{{ error }}</span>
                                     {% endfor %}
                                 </div>
                             {% else %}
-                                {{ form.model(class="form-control form-control-lg") }}
+                                {{ form.returnRatio(class="form-control form-control-lg", placeholder="e.g. 3") }}
                             {% endif %}
+                            <small class="form-text text-muted">Number of foldable containers that fit inside another (1–10)</small>
                         </div>
                     </div>
+                    {% endif %}
+                    {% if showCurrentLocation %}
                     <div class="col-md-6">
                         <div class="form-group">
-                            {{ form.productionDate.label(class="form-control-label") }}
-                            {% if form.productionDate.errors %}
-                                {{ form.productionDate(class="form-control form-control-lg is-invalid") }}
+                            {{ form.currentLocation.label(class="form-control-label") }}
+                            {% if form.currentLocation.errors %}
+                                {{ form.currentLocation(class="form-control form-control-lg is-invalid", placeholder="e.g. Plant Valencia") }}
                                 <div class="invalid-feedback">
-                                    {% for error in form.productionDate.errors %}
+                                    {% for error in form.currentLocation.errors %}
                                         <span>{{ error }}</span>
                                     {% endfor %}
                                 </div>
                             {% else %}
-                                {{ form.productionDate(class="form-control form-control-lg") }}
+                                {{ form.currentLocation(class="form-control form-control-lg", placeholder="e.g. Plant Valencia") }}
                             {% endif %}
+                            <small class="form-text text-muted">Current facility or warehouse location</small>
                         </div>
                     </div>
+                    {% endif %}
                 </div>
+
+                {% if serviceFieldMetadata %}
+                <hr class="custom-hr">
+
+                <h5 class="mt-4 mb-3 section-title"><i class="fas fa-cogs"></i> Service-Specific Attributes</h5>
+                <p class="text-muted small mb-3">Fill in the required attributes for this model.</p>
+
                 <div class="row">
+                    {% for fieldMeta in serviceFieldMetadata %}
+                    {% set field = form[fieldMeta.key] %}
                     <div class="col-md-6">
+                        {% if fieldMeta.inputType == "boolean" %}
+                        <div class="form-group pt-2">
+                            <div class="form-check">
+                                {% if field.errors %}
+                                    {{ field(class="form-check-input is-invalid") }}
+                                {% else %}
+                                    {{ field(class="form-check-input") }}
+                                {% endif %}
+                                {{ field.label(class="form-check-label") }}
+                            </div>
+                            {% if field.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in field.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">
+                                {{ fieldMeta.description }}{% if fieldMeta.unit %} ({{ fieldMeta.unit }}){% endif %}
+                            </small>
+                        </div>
+                        {% elif fieldMeta.inputType == "date" %}
                         <div class="form-group">
-                            {{ form.material.label(class="form-control-label") }}
-                            {% if form.material.errors %}
-                                {{ form.material(class="form-control form-control-lg is-invalid") }}
+                            {{ field.label(class="form-control-label") }}
+                            {% if field.errors %}
+                                {{ field(class="form-control form-control-lg is-invalid", type="date") }}
                                 <div class="invalid-feedback">
-                                    {% for error in form.material.errors %}
+                                    {% for error in field.errors %}
                                         <span>{{ error }}</span>
                                     {% endfor %}
                                 </div>
                             {% else %}
-                                {{ form.material(class="form-control form-control-lg") }}
+                                {{ field(class="form-control form-control-lg", type="date") }}
                             {% endif %}
+                            <small class="form-text text-muted">
+                                {{ fieldMeta.description }}{% if fieldMeta.unit %} ({{ fieldMeta.unit }}){% endif %}
+                            </small>
                         </div>
-                    </div>
-                    <div class="col-md-6">
+                        {% else %}
                         <div class="form-group">
-                            {{ form.color.label(class="form-control-label") }}
-                            {% if form.color.errors %}
-                                {{ form.color(class="form-control form-control-lg is-invalid") }}
+                            {{ field.label(class="form-control-label") }}
+                            {% if field.errors %}
+                                {{ field(class="form-control form-control-lg is-invalid", placeholder="e.g. 95") }}
                                 <div class="invalid-feedback">
-                                    {% for error in form.color.errors %}
+                                    {% for error in field.errors %}
                                         <span>{{ error }}</span>
                                     {% endfor %}
                                 </div>
                             {% else %}
-                                {{ form.color(class="form-control form-control-lg") }}
+                                {{ field(class="form-control form-control-lg", placeholder="e.g. 95") }}
                             {% endif %}
+                            <small class="form-text text-muted">
+                                {{ fieldMeta.description }}{% if fieldMeta.unit %} ({{ fieldMeta.unit }}){% endif %}
+                            </small>
                         </div>
+                        {% endif %}
                     </div>
+                    {% endfor %}
                 </div>
-                <!-- Add more field pairs here -->
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            {{ form.serialNumber.label(class="form-control-label") }}
-                            {% if form.serialNumber.errors %}
-                                {{ form.serialNumber(class="form-control form-control-lg is-invalid") }}
-                                <div class="invalid-feedback">
-                                    {% for error in form.serialNumber.errors %}
-                                        <span>{{ error }}</span>
-                                    {% endfor %}
-                                </div>
-                            {% else %}
-                                {{ form.serialNumber(class="form-control form-control-lg") }}
-                            {% endif %}
+                {% endif %}
+
+                <hr class="custom-hr">
+
+                <!-- Lifecycle fields info (auto-initialized) -->
+                <h5 class="mt-4 mb-3 section-title"><i class="fas fa-recycle"></i> Lifecycle Fields (Auto-initialized)</h5>
+                <p class="text-muted small mb-3">These fields will be automatically set when the product is registered.</p>
+                
+                <div class="fixed-fields-container mb-4">
+                    <div class="row mb-2">
+                        <div class="col-md-4"><strong class="fixed-field-label">Status</strong></div>
+                        <div class="col-md-8"><span class="badge badge-success">{{ lifecycleDefaults.get('status') }}</span></div>
+                    </div>
+                    {% if showNumberOfUses %}
+                    <div class="row mb-2">
+                        <div class="col-md-4"><strong class="fixed-field-label">Number of Uses</strong></div>
+                        <div class="col-md-8"><span class="fixed-field-value">{{ lifecycleDefaults.get('numberOfUses', 0) }}</span></div>
+                    </div>
+                    {% endif %}
+                    <div class="row mb-2">
+                        <div class="col-md-4"><strong class="fixed-field-label">Condition</strong></div>
+                        <div class="col-md-8"><span class="badge badge-info">{{ lifecycleDefaults.get('condition') }}</span></div>
+                    </div>
+                    {% if lifecycleDefaults.get('currentLocation') %}
+                    <div class="row mb-2">
+                        <div class="col-md-4"><strong class="fixed-field-label">Current Location</strong></div>
+                        <div class="col-md-8"><span class="fixed-field-value">{{ lifecycleDefaults.get('currentLocation') }}</span></div>
+                    </div>
+                    {% endif %}
+                    {% if showLastMaintenanceDate %}
+                    <div class="row mb-2">
+                        <div class="col-md-4"><strong class="fixed-field-label">Last Maintenance Date</strong></div>
+                        <div class="col-md-8">
+                            <span class="fixed-field-value text-muted">
+                                {{ lifecycleDefaults.get('lastMaintenanceDate') if lifecycleDefaults.get('lastMaintenanceDate') else "N/A" }}
+                            </span>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            {{ form.recyclability.label(class="form-control-label") }}
-                            {% if form.recyclability.errors %}
-                                {{ form.recyclability(class="form-control form-control-lg is-invalid") }}
-                                <div class="invalid-feedback">
-                                    {% for error in form.recyclability.errors %}
-                                        <span>{{ error }}</span>
-                                    {% endfor %}
-                                </div>
-                            {% else %}
-                                {{ form.recyclability(class="form-control form-control-lg") }}
-                            {% endif %}
+                    {% endif %}
+                    {% if showLifecycleCarbonFootprint %}
+                    <div class="row mb-2">
+                        <div class="col-md-4"><strong class="fixed-field-label">Lifecycle Carbon Footprint</strong></div>
+                        <div class="col-md-8">
+                            <span class="fixed-field-value">
+                                {% set lifecycleCF = lifecycleDefaults.get('lifecycleCarbonFootprint', productModel.get('manufacturingCarbonFootprint')) %}
+                                {% if lifecycleCF is not none %}
+                                    {{ lifecycleCF }} kgCO₂
+                                {% elif 'manufacturingCarbonFootprint' in productModel.get('serviceFields', []) %}
+                                    Auto-initialized from Manufacturing Carbon Footprint input
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </span>
                         </div>
                     </div>
+                    {% endif %}
+
+                    {% for fieldMeta in additionalLifecycleFields %}
+                    <div class="row mb-2">
+                        <div class="col-md-4"><strong class="fixed-field-label">{{ fieldMeta.label }}</strong></div>
+                        <div class="col-md-8">
+                            <span class="fixed-field-value text-muted">
+                                {{ lifecycleDefaults.get(fieldMeta.key) if lifecycleDefaults.get(fieldMeta.key) else "N/A" }}
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            {{ form.weight.label(class="form-control-label") }}
-                            {% if form.weight.errors %}
-                                {{ form.weight(class="form-control form-control-lg is-invalid") }}
-                                <div class="invalid-feedback">
-                                    {% for error in form.weight.errors %}
-                                        <span>{{ error }}</span>
-                                    {% endfor %}
-                                </div>
-                            {% else %}
-                                {{ form.weight(class="form-control form-control-lg") }}
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            {{ form.size.label(class="form-control-label") }}
-                            {% if form.size.errors %}
-                                {{ form.size(class="form-control form-control-lg is-invalid") }}
-                                <div class="invalid-feedback">
-                                    {% for error in form.size.errors %}
-                                        <span>{{ error }}</span>
-                                    {% endfor %}
-                                </div>
-                            {% else %}
-                                {{ form.size(class="form-control form-control-lg") }}
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
+
             </fieldset>
-            <!-- Submit button -->
-            <div class="form-group">
-                {{ form.submit(class="btn", style="background-color: #4f5c53; color: white; border-color: #4f5c53;") }}
+            <!-- Submit and back buttons -->
+            <div class="form-group d-flex justify-content-between">
+                <a href="{{ url_for('product.registerProduct') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to model selection
+                </a>
+                {{ form.submit(class="btn btn-unimaas mb-14") }}
             </div>
         </form>
     </div>

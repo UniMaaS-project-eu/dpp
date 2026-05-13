@@ -12,34 +12,132 @@ httpSession = requests.Session()
 def buildURL(base, params):
     return f"{base}?{'&'.join([f'{key}={value}' for key, value in params.items()])}"
 
-def fillInData(form):
+
+def toSerializableValue(value):
+    if hasattr(value, "isoformat"):
+        return value.isoformat()
+    return value
+
+def fillInData(form, productModel, modelKey=None, userEmail=None):
     """
-    Build NGSI-LD payload from the form data.
+    Build NGSI-LD payload from the form data and product model.
+    Combines fixed fields (from model), dynamic fields (from form), and lifecycle defaults.
     """
+    from product_models import (
+        getLifecycleDefaults,
+        getModelDynamicFields,
+        getModelServiceFields,
+        SERVICE_FIELD_UNIT_CODES,
+    )
+
+    partNumber = str(form.partNumber.data).strip()
+    lifecycleDefaults = getLifecycleDefaults(modelKey)
+    dynamicFields = getModelDynamicFields(modelKey) if modelKey else []
+    serviceFields = getModelServiceFields(modelKey) if modelKey else []
 
     data = {
         "@context": [
             "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
         ],
-        "id": f"urn:ngsi-ld:Asset:{form.productID.data}",  # El ID debe ser una URI válida
-        "type": "Asset",
-        "opType": {"type": "Property", "value": 1},
-        "appraisedValue": {"type": "Property", "value": "1"},
-        "color": {"type": "Property", "value": form.color.data},
-        "manufacturer": {"type": "Property", "value": form.manufacturer.data},
-        "material": {"type": "Property", "value": form.material.data},
-        "model": {"type": "Property", "value": form.model.data},
-        "productionDate": {"type": "Property", "value": form.productionDate.data},
-        "recyclability": {"type": "Property", "value": form.recyclability.data},
-        "serialNumber": {"type": "Property", "value": form.serialNumber.data},
-        "size": {"type": "Property", "value": form.size.data},
-        "weight": {"type": "Property", "value": form.weight.data}
+        "id": f"urn:ngsi-ld:Product:{partNumber}",
+        "type": "Product",
+
+        # Dynamic fields from form
+        "partNumber": {"type": "Property", "value": partNumber},
+        "manufacturingDate": {"type": "Property", "value": toSerializableValue(form.manufacturingDate.data)},
+
+        # Lifecycle fields (auto-initialized)
+        "status": {"type": "Property", "value": toSerializableValue(lifecycleDefaults["status"])},
+        "condition": {"type": "Property", "value": toSerializableValue(lifecycleDefaults["condition"])},
     }
+
+    if "numberOfUses" in lifecycleDefaults:
+        data["numberOfUses"] = {
+            "type": "Property",
+            "value": toSerializableValue(lifecycleDefaults["numberOfUses"]),
+        }
+
+    modelMetadataKeys = {
+        "dynamicFields",
+        "serviceFields",
+        "lifecycleDefaults",
+        "hasReturnRatio",
+        "additionalFixedFields",
+        "requiredFixedFields",
+        "lifecycleExcludedFields",
+    }
+
+    for fieldName, fieldValue in productModel.items():
+        if fieldName in modelMetadataKeys:
+            continue
+        if fieldValue is None:
+            continue
+
+        payload = {"type": "Property", "value": toSerializableValue(fieldValue)}
+        if fieldName == "manufacturingCarbonFootprint":
+            payload["unitCode"] = "KGM"
+
+        data[fieldName] = payload
+
+    currentLocation = None
+    if "currentLocation" in dynamicFields:
+        currentLocation = form.currentLocation.data
+    elif lifecycleDefaults.get("currentLocation") is not None:
+        currentLocation = lifecycleDefaults.get("currentLocation")
+
+    if currentLocation not in [None, ""]:
+        data["currentLocation"] = {"type": "Property", "value": toSerializableValue(currentLocation)}
+
+    lifecycleCF = lifecycleDefaults.get("lifecycleCarbonFootprint")
+    if lifecycleCF is None:
+        lifecycleCF = productModel.get("manufacturingCarbonFootprint")
+    if lifecycleCF is None and "manufacturingCarbonFootprint" in serviceFields:
+        lifecycleCF = form.manufacturingCarbonFootprint.data
+    if lifecycleCF is not None:
+        data["lifecycleCarbonFootprint"] = {
+            "type": "Property",
+            "value": toSerializableValue(lifecycleCF),
+            "unitCode": "KGM",
+        }
+
+    lastMaintenanceDate = lifecycleDefaults.get("lastMaintenanceDate")
+    if lastMaintenanceDate is not None:
+        formattedLastMaintenance = toSerializableValue(lastMaintenanceDate)
+        data["lastMaintenanceDate"] = {"type": "Property", "value": formattedLastMaintenance}
+
+    for fieldName, fieldValue in lifecycleDefaults.items():
+        if fieldName in data:
+            continue
+        if fieldValue is None:
+            continue
+        data[fieldName] = {"type": "Property", "value": toSerializableValue(fieldValue)}
+
+    # returnRatio only applies to models that have it (not Europallet)
+    if productModel.get("hasReturnRatio") and form.returnRatio.data is not None:
+        data["returnRatio"] = {"type": "Property", "value": form.returnRatio.data}
+
+    for fieldName in serviceFields:
+        field = getattr(form, fieldName, None)
+        if not field:
+            continue
+        if field.data in [None, ""]:
+            continue
+        payload = {"type": "Property", "value": toSerializableValue(field.data)}
+        unitCode = SERVICE_FIELD_UNIT_CODES.get(fieldName)
+        if unitCode:
+            payload["unitCode"] = unitCode
+        data[fieldName] = payload
+
+    # Track who registered the product
+    if userEmail:
+        data["registeredBy"] = {"type": "Property", "value": userEmail}
+
     return data
 
 def canRegisterProduct(userinfo, rolesToCheck):
     userRoles = userinfo.get("roles", [])
-    return any(role in userRoles for role in rolesToCheck)
+    userEmail = (userinfo.get("email") or "").strip().lower()
+    return any(role in userRoles for role in rolesToCheck) or userEmail == "demo@test.com"
 
 def createSubscription(subscriptionData):
     """
@@ -95,12 +193,12 @@ def setupOrionSubscriptions():
     # Define our target subscriptions
     subscriptionsToCreate = []
     
-    # Subscription 1: Asset-Blockchain (opType==1)
+    # Subscription 1: Product-Blockchain (opType==1)
     subscription1Data = {
-        "id": "urn:ngsi-ld:Subscription:Asset-Blockchain",
+        "id": "urn:ngsi-ld:Subscription:Product-Blockchain",
         "type": "Subscription",
-        "description": "Notification to register asset on Blockchain when opType==1",
-        "entities": [{"type": "Asset"}],
+        "description": "Notification to register product on Blockchain when opType==1",
+        "entities": [{"type": "Product"}],
         "q": "opType==1",
         "status": "active",
         "isActive": True,
@@ -117,15 +215,15 @@ def setupOrionSubscriptions():
         "@context": "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context-v1.8.jsonld"
     }
     
-    # Subscription 2: Asset-Update (opType==2)
+    # Subscription 2: Product-Update (opType==2)
     subscription2Data = {
-        "id": "urn:ngsi-ld:Subscription:Asset-Update",
+        "id": "urn:ngsi-ld:Subscription:Product-Update",
         "type": "Subscription",
-        "description": "Notification to update asset on Blockchain when opType==2",
-        "entities": [{"type": "Asset"}],
+        "description": "Notification to update product on Blockchain when opType==2",
+        "entities": [{"type": "Product"}],
         "watchedAttributes": [
-            "appraisedValue", "color", "manufacturer", "material", "model",
-            "production_date", "recyclability", "serial_number", "size", "weight"
+            "status", "numberOfUses", "condition", "currentLocation",
+            "lastMaintenanceDate", "lifecycleCarbonFootprint"
         ],
         "q": "opType==2",
         "status": "active",

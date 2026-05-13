@@ -1,0 +1,119 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="default-container d-flex">
+    <div class="product-section flex-grow-1 p-4">
+        <form method="POST" novalidate autocomplete="off">
+            {{ form.hidden_tag() }}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">
+                    <img src="{{ url_for('static', filename='img/register_product_symbol.jpg') }}" alt="Register product" style="width: 50px; height: auto; margin-right: 7px;">
+                    <span>Select a Product Model</span>
+                </legend>
+
+                <p class="text-muted mb-4">
+                    Choose the type of product you want to register. The system will automatically load the fixed characteristics of the selected model.
+                </p>
+
+                <div class="row justify-content-center">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {{ form.modelKey.label(class="form-control-label") }}
+                            {% if form.modelKey.errors %}
+                                {{ form.modelKey(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.modelKey.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.modelKey(class="form-control form-control-lg") }}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Model preview cards -->
+                <div class="row mt-4" id="modelPreview" style="display: none;">
+                    <div class="col-md-12">
+                        <div class="card model-preview-card">
+                            <div class="card-body">
+                                <h5 class="card-title" id="previewModelName"></h5>
+                                <p class="card-text text-muted" id="previewDescription"></p>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <small class="text-muted"><strong>Manufacturer:</strong> <span id="previewManufacturer"></span></small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <small class="text-muted"><strong>TARIC Code:</strong> <span id="previewTaric"></span></small>
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-md-6">
+                                        <small class="text-muted"><strong>Durability:</strong> <span id="previewDurability"></span></small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <small class="text-muted"><strong>Repairability:</strong> <span id="previewRepairability"></span></small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </fieldset>
+            <div class="form-group mt-3">
+                {{ form.submit(class="btn btn-unimaas") }}
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Model data for preview
+    const models = {{ productModels | tojson }};
+
+    function isNumericLike(value) {
+        return value !== null && value !== undefined && value !== "" && !Number.isNaN(Number(value));
+    }
+
+    function formatDurability(minValue, maxValue) {
+        const minText = (minValue === null || minValue === undefined) ? "" : String(minValue);
+        const maxText = (maxValue === null || maxValue === undefined) ? "" : String(maxValue);
+
+        if (!minText && !maxText) {
+            return "N/A";
+        }
+
+        if (minText === maxText) {
+            if (isNumericLike(minValue)) {
+                return `${minText} years`;
+            }
+            return minText;
+        }
+
+        if (isNumericLike(minValue) && isNumericLike(maxValue)) {
+            return `${minText} - ${maxText} years`;
+        }
+
+        return `${minText} - ${maxText}`;
+    }
+
+    document.getElementById('modelKey').addEventListener('change', function() {
+        const key = this.value;
+        const preview = document.getElementById('modelPreview');
+
+        if (key && models[key]) {
+            const m = models[key];
+            document.getElementById('previewModelName').textContent = m.modelName || 'N/A';
+            document.getElementById('previewDescription').textContent = m.description || 'N/A';
+            document.getElementById('previewManufacturer').textContent = m.manufacturerName || 'N/A';
+            document.getElementById('previewTaric').textContent = m.taricCode || 'N/A';
+            document.getElementById('previewDurability').textContent = formatDurability(m.durabilityMinYears, m.durabilityMaxYears);
+            document.getElementById('previewRepairability').textContent = m.repairability || 'N/A';
+            preview.style.display = 'flex';
+        } else {
+            preview.style.display = 'none';
+        }
+    });
+</script>
+{% endblock content %}

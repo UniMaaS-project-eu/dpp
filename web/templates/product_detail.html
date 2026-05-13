@@ -1,0 +1,141 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="default-container d-flex">
+    <div class="product-section flex-grow-1 p-4">
+
+        <div class="d-flex justify-content-between align-items-start flex-wrap mb-3">
+            <div>
+                <h4 class="mb-1">{{ product.modelName }} · #{{ product.partNumber }}</h4>
+                <p class="text-muted mb-0">{{ product.description }}</p>
+            </div>
+            <span class="badge badge-pill badge-info" style="font-size: 0.95rem;">{{ product.status }}</span>
+        </div>
+
+        <!-- Fixed Model Properties -->
+        <h5 class="mt-4 mb-3 section-title"><i class="fas fa-lock"></i> Product Model Properties</h5>
+        <div class="fixed-fields-container mb-4">
+            {% for fieldKey, fieldLabel in fixedFieldLabels.items() %}
+            {% if product[fieldKey] is not none and product[fieldKey] != "" and fieldKey not in additionalLifecycleFieldKeys %}
+            <div class="row mb-2">
+                <div class="col-md-4"><strong class="fixed-field-label">{{ fieldLabel }}</strong></div>
+                <div class="col-md-8">
+                    <span class="fixed-field-value">
+                        {{ product[fieldKey] }}{% if fieldKey == "manufacturingCarbonFootprint" %} kgCO₂{% endif %}
+                    </span>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+
+        <hr class="custom-hr">
+
+        <!-- Instance Details -->
+        <h5 class="mt-4 mb-3 section-title"><i class="fas fa-barcode"></i> Instance Details</h5>
+        <div class="fixed-fields-container mb-4">
+            <div class="row mb-2">
+                <div class="col-md-4"><strong class="fixed-field-label">Part Number</strong></div>
+                <div class="col-md-8"><span class="fixed-field-value">{{ product.partNumber }}</span></div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-md-4"><strong class="fixed-field-label">Manufacturing Date</strong></div>
+                <div class="col-md-8"><span class="fixed-field-value">{{ product.manufacturingDate }}</span></div>
+            </div>
+            {% if product.returnRatio is not none and product.returnRatio != "" %}
+            <div class="row mb-2">
+                <div class="col-md-4"><strong class="fixed-field-label">Return Ratio</strong></div>
+                <div class="col-md-8"><span class="fixed-field-value">{{ product.returnRatio }}</span></div>
+            </div>
+            {% endif %}
+            <div class="row mb-2">
+                <div class="col-md-4"><strong class="fixed-field-label">Registered By</strong></div>
+                <div class="col-md-8"><span class="fixed-field-value">{{ product.registeredBy if product.registeredBy else "N/A" }}</span></div>
+            </div>
+        </div>
+
+        {% if serviceFieldMetadata %}
+        <hr class="custom-hr">
+
+        <h5 class="mt-4 mb-3 section-title"><i class="fas fa-cogs"></i> Service-Specific Attributes</h5>
+        <div class="fixed-fields-container mb-4">
+            {% for fieldMeta in serviceFieldMetadata %}
+            {% if product[fieldMeta.key] is not none and product[fieldMeta.key] != "" %}
+            <div class="row mb-2">
+                <div class="col-md-4"><strong class="fixed-field-label">{{ fieldMeta.label }}</strong></div>
+                <div class="col-md-8">
+                    <span class="fixed-field-value">
+                        {% if fieldMeta.inputType == "boolean" %}
+                            {% if product[fieldMeta.key] in [True, "true", "True", 1, "1"] %}
+                                Yes
+                            {% else %}
+                                No
+                            {% endif %}
+                        {% else %}
+                            {{ product[fieldMeta.key] }}{% if fieldMeta.unit %} {{ fieldMeta.unit }}{% endif %}
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <hr class="custom-hr">
+
+        <!-- Lifecycle Fields -->
+        <h5 class="mt-4 mb-3 section-title"><i class="fas fa-recycle"></i> Lifecycle</h5>
+        <div class="fixed-fields-container mb-4">
+            <div class="row mb-2">
+                <div class="col-md-4"><strong class="fixed-field-label">Status</strong></div>
+                <div class="col-md-8"><span class="badge badge-success">{{ product.status }}</span></div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-md-4"><strong class="fixed-field-label">Condition</strong></div>
+                <div class="col-md-8"><span class="badge badge-info">{{ product.condition }}</span></div>
+            </div>
+            {% if product.numberOfUses is not none and product.numberOfUses != "" %}
+            <div class="row mb-2">
+                <div class="col-md-4"><strong class="fixed-field-label">Number of Uses</strong></div>
+                <div class="col-md-8"><span class="fixed-field-value">{{ product.numberOfUses }}</span></div>
+            </div>
+            {% endif %}
+            <div class="row mb-2">
+                <div class="col-md-4"><strong class="fixed-field-label">Current Location</strong></div>
+                <div class="col-md-8"><span class="fixed-field-value">{{ product.currentLocation }}</span></div>
+            </div>
+            {% if product.lastMaintenanceDate is not none and product.lastMaintenanceDate != "" %}
+            <div class="row mb-2">
+                <div class="col-md-4"><strong class="fixed-field-label">Last Maintenance Date</strong></div>
+                <div class="col-md-8"><span class="fixed-field-value">{{ product.lastMaintenanceDate }}</span></div>
+            </div>
+            {% endif %}
+            {% if showLifecycleCarbonFootprint %}
+            <div class="row mb-2">
+                <div class="col-md-4"><strong class="fixed-field-label">Lifecycle Carbon Footprint</strong></div>
+                <div class="col-md-8"><span class="fixed-field-value">{{ product.lifecycleCarbonFootprint }} kgCO₂</span></div>
+            </div>
+            {% endif %}
+            {% for fieldMeta in additionalLifecycleFields %}
+            <div class="row mb-2">
+                <div class="col-md-4"><strong class="fixed-field-label">{{ fieldMeta.label }}</strong></div>
+                <div class="col-md-8"><span class="fixed-field-value">{{ product[fieldMeta.key] if product[fieldMeta.key] else "N/A" }}</span></div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Action buttons -->
+        <div class="d-flex justify-content-between mt-4">
+            <a href="{{ url_for('product.search') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to search
+            </a>
+            {% if canEdit %}
+            <a href="{{ url_for('product.editProduct', partNumber=product.partNumber) }}" class="btn btn-unimaas">
+                <i class="fas fa-edit"></i> Edit Product
+            </a>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+{% endblock content %}

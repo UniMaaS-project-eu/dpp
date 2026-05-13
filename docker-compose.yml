@@ -26,7 +26,7 @@ services:
     depends_on:
       - mongo
     expose:
-      - "${ORION_EXTERNAL_PORT}"
+      - "${ORION_INTERNAL_PORT}"
     ports:
       - "${ORION_EXTERNAL_PORT}:${ORION_INTERNAL_PORT}" 
     logging:
@@ -52,13 +52,15 @@ services:
     depends_on:
       - orion
       - keycloak
-    ports:
-    - "${WEB_EXTERNAL_PORT}:${WEB_INTERNAL_PORT}"
+    expose:
+      - "${WEB_INTERNAL_PORT}"
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
+    volumes:
+      - ./web:/app
     networks:
       dpp_network:
         ipv4_address: ${NETWORK_PREFIX}.4
@@ -66,7 +68,7 @@ services:
       - WEB_INTERNAL_PORT=${WEB_INTERNAL_PORT}
       - WEB_SECRET_KEY=${WEB_SECRET_KEY}
       - WEB_DEBUG=${WEB_DEBUG} # Values: 0 - False, 1 - True
-      - ORION_URL=${ORION_PROTOCOL}${ORION_HOSTNAME}:${ORION_EXTERNAL_PORT}
+      - ORION_URL=${ORION_PROTOCOL}${ORION_HOSTNAME}:${ORION_INTERNAL_PORT}
       - KEYCLOAK_REALM=${KEYCLOAK_REALM}
       - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID}
       - KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}
@@ -74,10 +76,31 @@ services:
       - KEYCLOAK_INTERNAL_URL=${KEYCLOAK_PROTOCOL}${KEYCLOAK_HOSTNAME}:${KEYCLOAK_INTERNAL_PORT}
       - API_REST_URL=${API_PROTOCOL}${API_HOSTNAME}:${API_EXTERNAL_PORT}
 
+  web-https-proxy:
+    image: nginx:1.27-alpine
+    hostname: web-https-proxy
+    container_name: web-https-proxy
+    depends_on:
+      - web
+    ports:
+      - "${WEB_EXTERNAL_PORT}:443"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    volumes:
+      - ./certs:/etc/nginx/certs:ro
+      - ./web/nginx-https.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      dpp_network:
+        ipv4_address: ${NETWORK_PREFIX}.6
+    restart: always
+
   keycloak:
     image: quay.io/keycloak/keycloak:${KEYCLOAK_VERSION}
     hostname: ${KEYCLOAK_HOSTNAME}
-    container_name: keycloak
+    container_name: keycloak-dpp
     ports:
       - "${KEYCLOAK_EXTERNAL_PORT}:${KEYCLOAK_INTERNAL_PORT}"
     logging:
@@ -94,12 +117,14 @@ services:
       - keycloak-volume:/opt/keycloak/data
       - ./certs/:/opt/keycloak/certs
     environment:
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
       - KC_BOOTSTRAP_ADMIN_USERNAME=${KEYCLOAK_ADMIN}
       - KC_BOOTSTRAP_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
       - KC_REALM=${KEYCLOAK_REALM}
       - KC_HTTPS_CERTIFICATE_FILE=/opt/keycloak/certs/${KEYCLOAK_CERT}
       - KC_HTTPS_CERTIFICATE_KEY_FILE=/opt/keycloak/certs/${KEYCLOAK_KEY}
-      - KC_HOSTNAME=localhost # Remove in the future (this allows a token with localhost issuer)
+      - KC_HOSTNAME=${KEYCLOAK_PROTOCOL}${KEYCLOAK_PUBLIC_HOSTNAME}:${KEYCLOAK_EXTERNAL_PORT} # Keep issuer consistent for browser and backend calls
       - KC_HOSTNAME_STRICT=false # Remove in the future (this allows a token with localhost issuer)
 
 networks:

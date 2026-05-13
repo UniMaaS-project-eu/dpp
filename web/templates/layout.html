@@ -37,8 +37,8 @@
         <header class="site-header">
           <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
             <div class="container">
-              <a class="navbar-brand navbar-brand-spacing" href="/">
-                <img src="{{ url_for('static', filename='img/UniMaaS-logo-big.png') }}" alt="UniMaaS Logo" style="height: 40px; margin-right: 10px; padding: 4px; background-color: rgba(255,255,255,0.15); border-radius: 4px;">
+              <a class="navbar-brand navbar-brand-spacing" href="{{ url_for('general.home') }}">
+                <img src="{{ url_for('static', filename='img/UniMaaS-logo-big.png') }}" alt="UniMaaS Logo" class="navbar-brand-logo">
               </a>
               <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -99,7 +99,7 @@
 
         <footer class="container-fluid text-center p-2 mt-4">
           <span>Developed by </span>
-          <a href="https://odins.es/en/" style="color: #4f5c53; text-decoration: none; display: inline-flex; align-items: center;">
+          <a href="https://odins.es/en/" class="footer-link">
             <img src="{{ url_for('static', filename='img/odinsLogo.png') }}" alt="ODINS Logo" style="height: 18px; margin-right: 5px;">
             ODINS
           </a>

@@ -1,64 +1,101 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="container text-center">
-    <form class="search-form d-flex" role="search" action="/search" method="POST">
-        <img src="{{ url_for('static', filename='img/search_symbol.png') }}" alt="Icon" style="height: 45px; width: 45px; margin-right: 10px;">
-        <select class="search-select form-control" name="characteristic" style="margin-right: 20px; height: 45px; width: 280px; font-size: 14px;">
-            <option selected disabled>Choose characteristic</option>
-            <option value="manufacturer">Manufacturer</option>
-            <option value="model">Model</option>
-            <option value="material">Material</option>
-            <option value="color">Color</option>
-            <option value="recyclability">Recyclability</option>
-            <option value="productionDate">Production date</option>
-            <option value="serialNumber">Serial number</option>
-            <option value="height">Height</option>
-            <option value="weight">Weight</option>
-        </select>
-        <input class="search-input form-control" name="search" type="search" placeholder="Type the word you want to search" aria-label="Search" style="margin-right: 10px;">
-        <button class="search-button btn" type="submit" style="background-color: #4f5c53; color: white; border-color: #4f5c53;">Search</button>
-    </form>
+<div class="search-page">
+    <div class="search-panel">
+        <div class="d-flex align-items-center mb-3">
+            <img src="{{ url_for('static', filename='img/search_symbol.png') }}" alt="Search icon" class="search-panel-icon">
+            <div>
+                <h4 class="mb-1">Search products</h4>
+                <p class="text-muted mb-0">Filter products by Product Model and optionally refine with free text.</p>
+            </div>
+        </div>
+
+        <form role="search" action="{{ url_for('product.search') }}" method="POST">
+            <div class="form-row align-items-end">
+                <div class="form-group col-md-4">
+                    <label class="form-control-label" for="modelKey">Product Model</label>
+                    <select class="form-control" id="modelKey" name="modelKey">
+                        <option value="">All models</option>
+                        {% for key, label in model_choices %}
+                            <option value="{{ key }}" {% if selected_model_key == key %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group col-md-5">
+                    <label class="form-control-label" for="search">Text filter</label>
+                    <input class="form-control" id="search" name="search" type="search" value="{{ search_query }}" placeholder="Part number, location, status, condition..." aria-label="Search">
+                </div>
+
+                <div class="form-group col-md-3 d-flex">
+                    <button class="btn btn-unimaas flex-fill mr-2" name="action" value="search" type="submit">Search</button>
+                    <button class="btn btn-outline-danger flex-fill" name="action" value="cleanup" type="submit">Clean legacy</button>
+                </div>
+            </div>
+        </form>
+    </div>
 
     {% if warning_message %}
-        <div class="alert alert-warning" style="margin-top: 20px;">
-            <strong>Warning:</strong> {{ warning_message }}
+        <div class="alert alert-warning mt-3 mb-0">
+            {{ warning_message }}
+        </div>
+    {% endif %}
+
+    {% if cleanup_summary %}
+        <div class="alert alert-info mt-3 mb-0">
+            Deleted Asset entities: <strong>{{ cleanup_summary.deleted_assets }}</strong> ·
+            Deleted invalid Product entities: <strong>{{ cleanup_summary.deleted_invalid_products }}</strong> ·
+            Errors: <strong>{{ cleanup_summary.errors }}</strong>
         </div>
     {% endif %}
 
     {% if items_search is not none %}
-    <div style="margin-top: 30px; margin-bottom: 20px;">
-        <h4 style="color: black; text-align: left;">Matches found with '{{ search_query }}'</h4>
+    <div class="results-header mt-4 mb-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">{{ items_search|length }} products found</h5>
+        {% if selected_model_key %}
+            <span class="badge badge-pill badge-secondary">Filtered by selected model</span>
+        {% endif %}
     </div>
 
     <div class="search-container">
         {% if items_search %}
             {% for item in items_search %}
-            <div class="search-content">
-                <h2 style="margin-bottom: 20px;"><em>{{ item['manufacturer'] }} {{ item['model'] }}</em></h2>
-                <h6>
-                    <em>Serial number: </em>{{ item['serialNumber'] }}
-                    <span class="separator">|</span>
-                    <em>Production date: </em>{{ item['productionDate'] }}
-                    <span class="separator">|</span>
-                    <em>Material: </em>{{ item['material'] }}
-                </h6>
-                <h6>
-                    <em>Size (cm): </em>{{ item['size'] }}
-                    <span class="separator">|</span>
-                    <em>Weight (kg): </em>{{ item['weight'] }}
-                </h6>
-                <h6>
-                    <img src="{{ url_for('static', filename='img/colours_symbol.png') }}" alt="Icon" class="info_product_image">: {{ item['color'] }}
-                    <span class="separator">|</span>
-                    <img src="{{ url_for('static', filename='img/recyclability_symbol.png') }}" alt="Icon" class="info_product_image">: {{ item['recyclability'] }}
-                </h6>
+            <div class="product-result-card">
+                <div class="d-flex justify-content-between align-items-start flex-wrap mb-2">
+                    <div>
+                        <h5 class="mb-1">{{ item.modelName }} · #{{ item.partNumber }}</h5>
+                        <p class="mb-0 text-muted">{{ item.description }}</p>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="badge badge-pill badge-info mr-2">{{ item.status }}</span>
+                        <a href="{{ url_for('product.productDetail', partNumber=item.partNumber) }}" class="btn btn-sm btn-unimaas" title="View full details">
+                            <i class="fas fa-eye"></i> Details
+                        </a>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-4 mb-2"><strong>Manufacturer:</strong> {{ item.manufacturerName }}</div>
+                    <div class="col-md-4 mb-2"><strong>Manufacturing date:</strong> {{ item.manufacturingDate }}</div>
+                    <div class="col-md-4 mb-2"><strong>Current location:</strong> {{ item.currentLocation }}</div>
+                    <div class="col-md-4 mb-2"><strong>Condition:</strong> {{ item.condition }}</div>
+                    {% if item.numberOfUses is not none and item.numberOfUses != "" %}
+                    <div class="col-md-4 mb-2"><strong>Number of uses:</strong> {{ item.numberOfUses }}</div>
+                    {% endif %}
+                    <div class="col-md-4 mb-2"><strong>Lifecycle CF:</strong> {{ item.lifecycleCarbonFootprint }} kgCO₂</div>
+                    {% if item.returnRatio != "" and item.returnRatio is not none %}
+                    <div class="col-md-4 mb-2"><strong>Return ratio:</strong> {{ item.returnRatio }}</div>
+                    {% endif %}
+                </div>
             </div>
             {% endfor %}
         {% else %}
-            <h4 style="color: #c85450;">No matches found.</h4>
+            <div class="empty-results">
+                <h5 class="mb-2">No products found</h5>
+                <p class="text-muted mb-0">Try another model or remove part of the text filter.</p>
+            </div>
         {% endif %}
     </div>
     {% endif %}
-
 </div>
 {% endblock content %}

@@ -4,6 +4,7 @@ import config
 import logging
 import utils
 from routes import registerBPs
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 # Logging configuration
 logging.basicConfig(format="%(filename)s:%(lineno)d - %(levelname)s - %(message)s")
@@ -39,11 +40,13 @@ if not config.apiRestURL:
 
 # Flask configuration
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 app.config['SECRET_KEY'] = config.secretKey
 app.config["SESSION_TYPE"] = "filesystem"  # Save sessions in the filesystem
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_USE_SIGNER"] = True
 app.config["SESSION_FILE_DIR"] = "./flask_session"  # Directory to store session files
+app.config["PREFERRED_URL_SCHEME"] = "https" if config.useSSL else "http"
 app.jinja_env.globals.update(canRegisterProduct=utils.canRegisterProduct)
 
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -60,7 +63,13 @@ if __name__ == "__main__":
     utils.setupOrionSubscriptions()
     logging.info("Orion-LD subscription setup finished, starting Flask app")
     
-    app.run(host="0.0.0.0", 
-            port=config.listenPort, 
-            debug=True, 
-            ssl_context=sslContext)
+    runArgs = {
+        "host": "0.0.0.0",
+        "port": config.listenPort,
+        "debug": config.debug
+    }
+
+    if config.useSSL:
+        runArgs["ssl_context"] = sslContext
+
+    app.run(**runArgs)
